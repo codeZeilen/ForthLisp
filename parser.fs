@@ -75,6 +75,9 @@
         swap >node-next-node swap
     REPEAT swap drop ;
 
+: is-whitespace? ( char -- b )
+    10 over = over 32 = or over 9 = or ;
+
 : sc-parse ( str str-length -- addr )
 ;
 
@@ -85,7 +88,7 @@
     0 swap 0 do
         drop
         dup i chars +               \ Current position
-        C@ 32 = if                  \ Another space
+        C@ is-whitespace? if                  \ Another space
             i leave 
        endif
        i 1 +
@@ -101,7 +104,7 @@
     make-new-list
     r@ 0 do
         over i chars +              \ Get current character
-        dup C@ 32 <> if             \ We've got no space here
+        dup C@ is-whitespace? invert if             \ We've got no space here
                                     \ Beginning of str is on stack
                 r> r@ swap >r       \ Get str-length
                 i -                 \ Adjust string length to substring
@@ -152,9 +155,12 @@ a-list @ >node-next-node >node-content
 30 make-number a-list @ >list-append 
 2 a-list @ >list-at >number-value 30 = assert
 
+9 is-whitespace? assert
+10 is-whitespace? assert
+32 is-whitespace? assert
+
 \ s" (+ 20 (+ 3 4) (foobar 2 3 4))" sc-parse .s
 \ s" hallo mein haus" sc-parse .s
 s" hallo mein haus" simple-parse-word
 s" hallo" simple-parse-word
 s"  hallo   mein  haus" simple-word-parse
-
