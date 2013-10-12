@@ -76,13 +76,7 @@
     REPEAT swap drop ;
 
 : is-whitespace? ( char -- b )
-    10 over = over 32 = or over 9 = or ;
-
-: sc-parse ( str str-length -- addr )
-;
-
-: word-parse ( str str-length -- addr )
-;
+    10 over = over 32 = or swap 9 = or ;
 
 : simple-parse-word ( str str-length -- substr substr-length )
     0 swap 0 do
@@ -119,17 +113,21 @@
     loop 
     r> drop ; \ Remove str-length from rstack
 
+: sc-parse ( str str-length -- addr )
+;
+
+: word-parse ( str str-length -- addr )
+;
+
 \ TESTS
 : assert ( res -- )
     0= if .s cr s" assertion error" exception throw endif ;
 
 s" hello you!" make-string 
-dup >string-content
-swap >string-length = 10 assert
+>string-length 10 = assert
 
 create a-number
 20 make-number a-number !
-a-number @ >number-value
 a-number @ >number-value 20 = assert
 
 create a-list
