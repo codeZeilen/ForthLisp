@@ -78,11 +78,20 @@
 : is-whitespace? ( char -- b )
     10 over = over 32 = or swap 9 = or ;
 
+: is-opening-bracket? ( char -- b )
+    40 = ;
+
+: is-closing-bracket? ( char -- b )
+    41 = ;
+
+: is-bracket? ( char -- b )
+    dup is-opening-bracket? swap is-closing-bracket? or ;
+
 : simple-parse-word ( str str-length -- substr substr-length )
     0 swap 0 do
         drop
         dup i chars +               \ Current position
-        C@ is-whitespace? if                  \ Another space
+        dup C@ is-whitespace? swap C@ is-bracket? or if        \ Another space
             i leave 
        endif
        i 1 +
@@ -91,14 +100,14 @@
     swap over
     dup chars allot                 \ Make room for the word 
     r@ swap cmove                   \ Copy string
-    r> swap ;                       \ Reorder return values
+    r> swap ( Debug ) 2dup type cr ;                       \ Reorder return values
 
 : simple-word-parse ( str str-length -- addr )
     >r                              \ Store str-length for future reference
     make-new-list
     r@ 0 do
-        over i chars +              \ Get current character
-        dup C@ is-whitespace? invert if             \ We've got no space here
+        over i chars +              \ Get current position
+        dup C@ is-whitespace? invert if                      \ We've got no bracket here
                                     \ Beginning of str is on stack
                 r> r@ swap >r       \ Get str-length
                 i -                 \ Adjust string length to substring
@@ -113,11 +122,67 @@
     loop 
     r> drop ; \ Remove str-length from rstack
 
-: sc-parse ( str str-length -- addr )
-;
+: sc-parse-word ( str str-length -- addr str-length )
+    simple-parse-word ;
 
-: word-parse ( str str-length -- addr )
-;
+: _sc-parse ( str str-length -- addr parsed-str-length ) 
+    s" New Parse" type cr
+    >r                              \ Store str-length for future reference
+    make-new-list
+    0                               \ Dummy i to be dropped at start of loop
+    r@ 0 do
+        drop
+        s" New Loop: " type i . cr
+        over i chars +              \ Get current position
+        dup C@ is-whitespace? if
+            s" Whitespace" type cr
+            drop
+        else dup C@ is-opening-bracket? if
+            s" Opening Bracket" type cr
+            
+            1 chars +               \ Move pointer forward
+            r> r@ swap >r           \ Get str-length
+            i -                     \ Adjust string length to substring
+            
+            recurse 
+            dup r> + 1 - >r         \ Jump index forth to end of parsed word
+            drop
+            s" Lenght of new list: " type dup >list-length . cr
+            s" Lenght of old list: " type over >list-length . cr
+            over >list-append
+        
+        else dup C@ is-closing-bracket? if
+            s" Closing Bracket" type cr
+
+            drop                    \ Current index isn't relevant anymore
+            swap drop               \ String isn't relevant anymore
+            s" Lenght of new list: " type dup >list-length . cr
+            i
+            r> r> swap drop >r      \ Remove overall str-length from rstack
+            unloop
+            exit
+            
+        else                        \ Case: Normal Word
+            s" Normal Word" type cr
+                                    \ Beginning of str is on stack
+            r> r@ swap >r          \ Get str-length
+            i -                    \ Adjust string length to substring
+
+            sc-parse-word 
+            dup r> + 1 - >r        \ Jump index forth to end of parsed word
+            make-string
+            over >list-append      \ Append word to list
+            
+        endif
+        endif
+        endif
+        i
+    loop
+    r> drop ;                       \ Remove str-length from rstack
+
+: sc-parse ( str str-length -- addr )
+    _sc-parse drop ; \ TODO check whether the string was completely parsed
+    
 
 \ TESTS
 : assert ( res -- )
@@ -142,6 +207,10 @@ a-list @ >node-next-node >node-content
 a-number @ 
     = assert
 
+a-list @ >list-length
+2
+    = assert
+
 a-list @ >node-next-node >node-content >number-value 
 a-number @ >number-value 
     = assert
@@ -152,13 +221,23 @@ a-list @ >node-next-node >node-content
 
 30 make-number a-list @ >list-append 
 2 a-list @ >list-at >number-value 30 = assert
+a-list @ >list-length 3 = assert
+30 make-number a-list @ >list-append 
+a-list @ >list-length 4 = assert
 
 9 is-whitespace? assert
 10 is-whitespace? assert
 32 is-whitespace? assert
 
-\ s" (+ 20 (+ 3 4) (foobar 2 3 4))" sc-parse .s
+40 is-opening-bracket? assert
+41 is-closing-bracket? assert
+
+40 is-bracket? assert
+41 is-bracket? assert
+
+\ s" hallo mein haus" simple-parse-word . .
+\ s" hallo" simple-parse-word . .
+\ s"  hallo   mein  haus" simple-word-parse . .
+
+s" (+ 20 (+ 3 4) (foobar 2 3 4))" sc-parse 
 \ s" hallo mein haus" sc-parse .s
-s" hallo mein haus" simple-parse-word
-s" hallo" simple-parse-word
-s"  hallo   mein  haus" simple-word-parse
