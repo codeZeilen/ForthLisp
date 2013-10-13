@@ -1,6 +1,7 @@
 : string-symbol 0 ;
 : number-symbol 1 ;
 : list-symbol 2 ;
+: node-symbol 3 ;
 
 : make-string ( addr u -- addr )
     here 3 cells allot
@@ -19,58 +20,91 @@
 : >is-number? ( a -- b ) @ number-symbol = ;
 : >number-value ( a -- n ) 1 cells + @ ;
 
-: make-empty-node ( -- addr )
-    here 3 cells allot
-    dup list-symbol swap ! ;
-: >is-list? ( a -- b ) @ list-symbol = ;
+: >is-node? ( a -- a ) @ node-symbol = ;
 : >node-content ( a -- a ) 1 cells + @ ;
 : >node-content! ( a list-a  -- ) 1 cells + ! ;
 : >node-next-node ( a -- a ) 2 cells + @ ;
 : >node-next-node! ( a list-a -- ) 2 cells + ! ;
-
-: make-new-list ( -- addr )
-    make-empty-node
+: make-empty-node ( -- addr )
+    here 3 cells allot
+    dup node-symbol swap ! 
     0 over >node-next-node! ;
 
+: make-list ( -- addr )
+    here 2 cells allot
+    dup list-symbol swap !
+    dup 1 cells + 0 swap ! ;
+: >is-list? ( a -- b ) @ list-symbol = ;
+: o>is-list? ( a -- a b ) dup @ list-symbol = ;
+: >list-head ( a -- a ) 1 cells + @ ; 
+: >list-head! ( a -- ) 1 cells + ! ; 
+: >list-empty? ( a -- b ) 1 cells + @ 0= ;
+: o>list-empty? ( a -- a b ) dup 1 cells + @ 0= ;
+
 : _list-node-at ( n a-list -- a )
-    over 1 + 0 do
-        over i = if
-            swap drop
-            unloop 
-            exit
-        else
-            >node-next-node dup
-            0= if
-                s" Debug: " type .s cr
-                drop drop
-                s" List index out of range" exception throw
+    o>list-empty? if
+        drop drop
+        s" List index out of range" exception throw
+    else
+        >list-head
+        over 1 + 0 do
+            over i = if
+                swap drop
+                unloop 
+                exit
+            else
+                >node-next-node dup
+                0= if
+                    s" Debug: " type .s cr
+                    drop drop
+                    s" List index out of range" exception throw
+                endif
             endif
-        endif
-    loop ;
+        loop 
+    endif ;
 
 : >list-last-node ( a-list -- a )
-    BEGIN
-        dup >node-next-node 0<>
-    WHILE
-        >node-next-node 
-    REPEAT ;
+    o>list-empty? if
+        drop 
+        s" Empty list" exception throw
+    else
+        >list-head
+        BEGIN
+            dup >node-next-node 0<>
+        WHILE
+            >node-next-node 
+        REPEAT 
+    endif ;
 
 : >list-at ( n a-list -- a )
     _list-node-at >node-content ;
 : >list-at! ( a-item n a-list )
     _list-node-at >node-content! ;
 : >list-append ( an-item a-list )
-    >list-last-node 
-    make-new-list 
-    swap over swap
-    >node-next-node! 
-    >node-content! ;
+    o>list-empty? if
+        make-empty-node
+        swap over swap
+        >list-head!
+        >node-content!
+    else
+        >list-last-node 
+        make-empty-node
+        swap over swap
+        >node-next-node! 
+        >node-content! 
+    endif ;
 
 : >list-length ( a-list -- u )
-    1
-    BEGIN
-        over >node-next-node 0<>
-    WHILE
-        1 + 
-        swap >node-next-node swap
-    REPEAT swap drop ;
+    o>list-empty? if
+        drop 0
+    else
+        >list-head
+        1
+        BEGIN
+            over >node-next-node 0<>
+        WHILE
+            1 + 
+            swap >node-next-node swap
+        REPEAT swap drop 
+    endif ;
+

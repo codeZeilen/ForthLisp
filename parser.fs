@@ -30,7 +30,7 @@ s" ./datatypes.fs" included
 : _sc-parse ( str str-length -- addr parsed-str-length ) 
     s" New Parse" type cr
     >r                              \ Store str-length for future reference
-    make-new-list
+    make-list
     0                               \ Dummy i to be dropped at start of loop
     r@ 0 do
         drop
