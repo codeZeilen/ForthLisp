@@ -1,7 +1,7 @@
-: string-symbol 0 ;
-: number-symbol 1 ;
-: list-symbol 2 ;
-: node-symbol 3 ;
+: string-symbol 1 ;
+: number-symbol 2 ;
+: list-symbol 3 ;
+: node-symbol 4 ;
 
 : make-string ( addr u -- addr )
     here 3 cells allot
