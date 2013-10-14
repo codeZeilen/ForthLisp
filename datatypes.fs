@@ -12,6 +12,10 @@
 : >is-string? ( a -- b ) @ string-symbol = ;
 : >string-length ( a -- a ) 1 cells + @ ;
 : >string-content ( a -- n ) 2 cells + @ ;
+: >string-type ( a -- ) 
+    34 emit 
+    dup >string-content swap >string-length type 
+    34 emit ;
 
 : make-number ( u -- addr )
     here 2 cells allot
@@ -19,6 +23,8 @@
     swap over 1 cells + ! ;
 : >is-number? ( a -- b ) @ number-symbol = ;
 : >number-value ( a -- n ) 1 cells + @ ;
+\ TODO: take care of hex vs. dec.
+: >number-type ( a -- ) >number-value . ; 
 
 : >is-node? ( a -- a ) @ node-symbol = ;
 : >node-content ( a -- a ) 1 cells + @ ;
@@ -106,4 +112,34 @@
             swap >node-next-node swap
         REPEAT swap drop 
     endif ;
+
+defer >list-type
+
+: >data-typer ( a -- )
+    dup >is-number? if
+        >number-type
+    else dup >is-string? if
+        >string-type
+    else dup >is-list? if
+        >list-type
+    else
+        s" r" type .
+    endif
+    endif
+    endif ;
+
+:noname ( a-list -- )
+    o>list-empty? if
+        drop
+        s" '()" type
+    else
+        s" (" type
+        dup >list-length 0 do
+            i over >list-at >data-typer
+            s"  " type
+        loop
+        drop
+        s" )" type 
+    endif ;
+is >list-type
 
