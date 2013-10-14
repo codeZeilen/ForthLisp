@@ -1,6 +1,24 @@
 s" ./testing.fs" included
 s" ./datatypes.fs" included
 
+\ Char extension
+
+48 _char-numeric? assert \ ASCII 0
+57 _char-numeric? assert \ ASCII 9
+54 _char-numeric? assert \ ASCII 6 
+47 _char-numeric? invert assert 
+58 _char-numeric? invert assert 
+
+\ unsigned extension
+2 4 _unsigned-power 16
+    = assert
+
+0 4 _unsigned-power 1
+    = assert
+
+4 2 _unsigned-power 16
+    = assert
+
 \ Strings
 s" hello you!" make-string 
 >string-length 10 
@@ -8,6 +26,22 @@ s" hello you!" make-string
 
 s" hello you!" make-string
 >is-string? assert
+
+s" 20" make-string
+0 swap >string-at 50
+    = assert
+
+s" hallo" make-string
+4 swap >string-at 111
+    = assert
+
+s" 20" make-string
+>string-to-number >is-number?
+    assert
+
+s" 20" make-string
+>string-to-number >number-value 20
+    = assert
 
 \ Numbers
 create a-number
