@@ -28,7 +28,7 @@ s" ./datatypes.fs" included
     r> swap ( Debug ) 2dup type cr ;                       \ Reorder return values
 
 : _sc-parse ( str str-length -- addr parsed-str-length ) 
-    s" New Parse" type cr
+    cr s" New Parse" type cr
     >r                              \ Store str-length for future reference
     make-list
     0                               \ Dummy i to be dropped at start of loop
@@ -47,19 +47,16 @@ s" ./datatypes.fs" included
             i -                     \ Adjust string length to substring
             
             recurse 
-            dup r> + 1 - >r         \ Jump index forth to end of parsed word
+            dup r> + >r         \ Jump index forth to end of parsed word
             drop
-            s" Lenght of new list: " type dup >list-length . cr
-            s" Lenght of old list: " type over >list-length . cr
             over >list-append
         
         else dup C@ is-closing-bracket? if
             s" Closing Bracket" type cr
 
-            drop                    \ Current index isn't relevant anymore
+            drop                    \ Current address isn't relevant anymore
             swap drop               \ String isn't relevant anymore
-            s" Lenght of new list: " type dup >list-length . cr
-            i
+            i 1 + 
             r> r> swap drop >r      \ Remove overall str-length from rstack
             unloop
             exit

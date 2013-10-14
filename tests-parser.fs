@@ -15,5 +15,19 @@ s" ./parser.fs" included
 \ s" hallo" simple-parse-word . .
 \ s"  hallo   mein  haus" simple-word-parse . .
 
+s" 20(10)20" sc-parse
+dup >list-length 3
+    = assert
+drop
+
 s" (+ 20 (+ 3 4) (foobar 2 3 4))" sc-parse 
-s" hallo mein haus" sc-parse .s
+dup >list-length 4
+drop
+
+s" hallo mein haus" sc-parse
+dup >list-length 3
+    = assert
+drop
+
+s" (+ 20 (+ 1 2) (foobar 3 4 5))" sc-parse 
+\ (+ 20 (+ 1 2) (foobar 3 4 5))
