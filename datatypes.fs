@@ -44,7 +44,7 @@
 : _list-node-at ( n a-list -- a )
     o>list-empty? if
         drop drop
-        s" List index out of range" exception throw
+        s" List index out of range - Empty list" exception throw
     else
         >list-head
         over 1 + 0 do
@@ -55,8 +55,7 @@
             else
                 >node-next-node dup
                 0= if
-                    s" Debug: " type .s cr
-                    drop drop
+                    drop cr s" List index: " type .
                     s" List index out of range" exception throw
                 endif
             endif
