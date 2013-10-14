@@ -6,6 +6,9 @@ s" hello you!" make-string
 >string-length 10 
     = assert
 
+s" hello you!" make-string
+>is-string? assert
+
 \ Numbers
 create a-number
 20 make-number a-number !
