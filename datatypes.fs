@@ -21,7 +21,7 @@
     swap drop ;
 
 : make-string ( addr u -- addr )
-    here 3 cells allot
+    3 cells allocate throw
     dup string-symbol swap !
     swap over 1 cells + ! 
     swap over 2 cells + ! ;
@@ -51,7 +51,7 @@
     -1 ;
 
 : make-number ( u -- addr )
-    here 2 cells allot
+    2 cells allocate throw
     dup number-symbol swap !
     swap over 1 cells + ! ;
 : >is-number? ( a -- b ) @ number-symbol = ;
@@ -75,12 +75,12 @@
 : >node-next-node ( a -- a ) 2 cells + @ ;
 : >node-next-node! ( a list-a -- ) 2 cells + ! ;
 : make-empty-node ( -- addr )
-    here 3 cells allot
+    3 cells allocate throw
     dup node-symbol swap ! 
     0 over >node-next-node! ;
 
 : make-list ( -- addr )
-    here 2 cells allot
+    2 cells allocate throw
     dup list-symbol swap !
     dup 1 cells + 0 swap ! ;
 : >is-list? ( a -- b ) @ list-symbol = ;
@@ -185,4 +185,3 @@ defer >list-type
         s" )" type 
     endif ;
 is >list-type
-

@@ -39,18 +39,18 @@ s" 20" make-string
 >string-to-number >is-number?
     assert
 
-s" 20" make-string
->string-to-number >number-value 20
+s" 30" make-string
+>string-to-number >number-value 30
     = assert
 
 \ Numbers
-create a-number
+variable a-number
 20 make-number a-number !
 a-number @ >number-value 20 
     = assert
 
 \ Lists
-create a-list
+variable a-list
 make-list a-list !
 a-list @ >list-length 0
     = assert
@@ -58,7 +58,7 @@ a-number @ a-list @ >list-append
 a-number @ >number-value 20 
     = assert
 
-a-list @ >node-next-node 
+a-list @ >list-head 
     0<> assert
 
 a-list @ >list-head >node-content 
