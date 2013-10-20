@@ -2,6 +2,9 @@
 : number-symbol 2 ;
 : list-symbol 3 ;
 : node-symbol 4 ;
+: 1call-symbol 5 ;
+: 2call-symbol 6 ;
+: 3call-symbol 7 ;
 
 : _char-numeric? ( char -- )
     47 over < swap 58 < and ;
@@ -185,3 +188,61 @@ defer >list-type
         s" )" type 
     endif ;
 is >list-type
+
+: make-1call ( addr addr -- addr ) ( param function -- call)
+    3 cells allocate throw
+    dup 1call-symbol swap !
+    swap over 1 cells + ! 
+    swap over 2 cells + ! ;
+
+: make-2call ( addr addr addr -- addr ) ( param2 param1 function -- call)
+    4 cells allocate throw
+    dup 2call-symbol swap !
+    swap over 1 cells + ! 
+    swap over 2 cells + ! 
+    swap over 3 cells + ! ;
+
+: make-3call ( addr addr addr -- addr ) ( param3 param2 param1 function -- call)
+    5 cells allocate throw
+    dup 3call-symbol swap !
+    swap over 1 cells + ! 
+    swap over 2 cells + ! 
+    swap over 3 cells + ! 
+    swap over 4 cells + ! ;
+
+: >is-call? ( addr -- b )
+    dup @ 1call-symbol = over @ 2call-symbol = or swap @ 3call-symbol = or ;
+
+: >call-function ( addr -- xt )
+    1 cells + @ ;
+
+: >call-parameter ( n addr -- o )
+    swap 2 + cells + @ ;
+
+: _1call ( addr -- ? )
+    0 over >call-parameter swap >call-function execute ; 
+
+: _2call ( addr -- ? )
+    1 over >call-parameter 
+    swap 0 over >call-parameter
+    swap >call-function execute ;
+
+: _3call ( addr -- ? )
+    2 over >call-parameter 
+    swap 1 over >call-parameter
+    swap 0 over >call-parameter
+    swap >call-function execute ;
+    
+
+: call-execute ( addr -- ? )
+    dup @ 1call-symbol = if
+       _1call 
+    else dup @ 2call-symbol = if
+        _2call
+    else dup @ 3call-symbol = if
+        _3call
+    else
+        drop
+    endif
+    endif
+    endif ;

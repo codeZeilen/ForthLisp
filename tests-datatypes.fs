@@ -86,3 +86,34 @@ a-list @ >list-length 2
 30 make-number a-list @ >list-append 
 a-list @ >list-length 3 
     = assert
+
+\ Calls
+: call-test-fun1
+    10 + ;
+
+10 ' call-test-fun1 make-1call >is-call? 
+assert
+
+10 ' call-test-fun1 make-1call call-execute
+20 = 
+    assert
+
+: call-test-fun2
+    10 + + ;
+
+10 10 ' call-test-fun2 make-2call >is-call? 
+assert
+
+10 10 ' call-test-fun2 make-2call call-execute
+30 = 
+    assert
+
+: call-test-fun3
+    10 + + + ;
+
+10 10 10 ' call-test-fun3 make-3call >is-call? 
+assert
+
+10 10 10 ' call-test-fun3 make-3call call-execute
+40 = 
+    assert
