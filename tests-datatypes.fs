@@ -1,15 +1,18 @@
 s" ./testing.fs" included
 s" ./datatypes.fs" included
 
-\ Char extension
-
+\ *****************************************
+\ Char Extension Tests
+\ *****************************************
 48 _char-numeric? assert \ ASCII 0
 57 _char-numeric? assert \ ASCII 9
 54 _char-numeric? assert \ ASCII 6 
 47 _char-numeric? invert assert 
 58 _char-numeric? invert assert 
 
-\ unsigned extension
+\ *****************************************
+\ Unsigned Extension Tests
+\ *****************************************
 2 4 _unsigned-power 16
     = assert
 
@@ -19,7 +22,9 @@ s" ./datatypes.fs" included
 4 2 _unsigned-power 16
     = assert
 
-\ Strings
+\ *****************************************
+\ String Tests
+\ *****************************************
 s" hello you!" make-string 
 >string-length 10 
     = assert
@@ -43,13 +48,17 @@ s" 30" make-string
 >string-to-number >number-value 30
     = assert
 
-\ Numbers
+\ *****************************************
+\ Number Tests
+\ *****************************************
 variable a-number
 20 make-number a-number !
 a-number @ >number-value 20 
     = assert
 
-\ Lists
+\ *****************************************
+\ List Tests
+\ *****************************************
 variable a-list
 make-list a-list !
 a-list @ >list-length 0
@@ -96,7 +105,19 @@ a-list @ >list-expand
 20 =
     assert
 
-\ Calls
+: map-test-fun1 
+    20 + ;
+' map-test-fun1 a-list @ >list-map
+0 over >list-at 
+40 =
+    assert
+1 over >list-at 
+50 =
+    assert
+
+\ *****************************************
+\ Call Tests
+\ *****************************************
 : call-test-fun1
     10 + ;
 

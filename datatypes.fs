@@ -181,6 +181,24 @@
 : >list-expand ( a-list -- ?* )
     ['] _list-expander swap >list-do ;
 
+: >list-map ( xt a-list -- a-list )
+    o>list-empty? if
+        drop drop
+    else
+        >list-head
+        swap >r >r
+        make-list \ Result List
+        BEGIN
+            r@ >node-content 
+            r> r@ swap >r 
+            execute 
+            over >list-append \ Building the result list
+            r@ >node-next-node 0<>
+        WHILE
+            r> >node-next-node >r
+        REPEAT r> r> drop drop
+    endif ;
+
 defer >list-type
 
 : >data-typer ( a -- )
