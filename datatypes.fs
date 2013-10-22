@@ -5,6 +5,7 @@
 : 1call-symbol 5 ;
 : 2call-symbol 6 ;
 : 3call-symbol 7 ;
+: ncall-symbol 8 ;
 
 : _char-numeric? ( char -- )
     47 over < swap 58 < and ;
@@ -159,6 +160,27 @@
         REPEAT swap drop 
     endif ;
 
+: >list-do ( xt a-list -- )
+    o>list-empty? if
+        drop drop
+    else
+        >list-head
+        swap >r >r
+        BEGIN
+            r@ >node-content 
+            r> r@ swap >r 
+            execute 
+            r@ >node-next-node 0<>
+        WHILE
+            r> >node-next-node >r
+        REPEAT r> r> drop drop
+    endif ;
+
+: _list-expander ( node-content -- node-content )
+    ;
+: >list-expand ( a-list -- ?* )
+    ['] _list-expander swap >list-do ;
+
 defer >list-type
 
 : >data-typer ( a -- )
@@ -210,6 +232,12 @@ is >list-type
     swap over 3 cells + ! 
     swap over 4 cells + ! ;
 
+: make-ncall ( addr addr -- addr ) ( list function -- call)
+    3 cells allocate throw
+    dup ncall-symbol swap !
+    swap over 1 cells + ! 
+    swap over 2 cells + ! ;
+
 : >is-call? ( addr -- b )
     dup @ 1call-symbol = over @ 2call-symbol = or swap @ 3call-symbol = or ;
 
@@ -232,7 +260,11 @@ is >list-type
     swap 1 over >call-parameter
     swap 0 over >call-parameter
     swap >call-function execute ;
-    
+
+: _ncall ( addr -- ? )
+    >r
+    0 r@ >call-parameter >list-expand
+    r> >call-function execute ;
 
 : call-execute ( addr -- ? )
     dup @ 1call-symbol = if
@@ -241,8 +273,11 @@ is >list-type
         _2call
     else dup @ 3call-symbol = if
         _3call
+    else dup @ ncall-symbol = if
+        _ncall
     else
         drop
+    endif
     endif
     endif
     endif ;

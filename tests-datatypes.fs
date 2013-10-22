@@ -87,6 +87,15 @@ a-list @ >list-length 2
 a-list @ >list-length 3 
     = assert
 
+make-list a-list !
+20 a-list @ >list-append
+30 a-list @ >list-append
+a-list @ >list-expand
+30 =
+    assert
+20 =
+    assert
+
 \ Calls
 : call-test-fun1
     10 + ;
@@ -116,4 +125,16 @@ assert
 
 10 10 10 ' call-test-fun3 make-3call call-execute
 40 = 
+    assert
+
+: call-test-funn
+    + + + ;
+
+30 20 10 5 make-list 
+swap over >list-append 
+swap over >list-append 
+swap over >list-append 
+swap over >list-append 
+' call-test-funn make-ncall call-execute
+65 =
     assert
