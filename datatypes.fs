@@ -182,6 +182,8 @@
     ['] _list-expander swap >list-do ;
 
 : >list-map ( xt a-list -- a-list )
+    ( To use >list-map provide a word which leaves a
+    value on the stack. ) 
     o>list-empty? if
         drop drop
     else
